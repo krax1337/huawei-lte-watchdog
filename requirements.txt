@@ -1,0 +1,4 @@
+huawei_lte_api
+python-dotenv
+prometheus-client
+schedule
