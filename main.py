@@ -92,7 +92,7 @@ if __name__ == '__main__':
             time.sleep(30)
             continue
 
-        ping_result = ping_host('1.1.1.1')
+        ping_result = ping_host('1.1.1.1', timeout = 10)
         
         bdw = client.monitoring.traffic_statistics()
         current_cell = int(client.device.signal()["cell_id"])
