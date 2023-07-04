@@ -4,16 +4,28 @@ on:
   push:
     tags:        
       - '*'
+      
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
 
   build:
 
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
     - name: Checkout the code       
       uses: actions/checkout@v1   
+      
+    - name: Docker Login      
+      if: success()      
+      run: |        
+        echo "${DOCKER_PASSWORD}" | docker login ${REGISTRY} --username "${DOCKER_USERNAME}" --password-stdin   
       
     - name: Set up Docker Buildx      
       uses: crazy-max/ghaction-docker-buildx@v1      
