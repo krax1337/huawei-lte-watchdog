@@ -74,6 +74,8 @@ first_band, sum_band = band_calculation(BANDS)
 networkband = "3FFFFFFF"
 networkmode = "03"
 
+connection = None
+
 schedule.every().day.at(TIME).do(reboot)
 
 if __name__ == '__main__':
@@ -85,8 +87,9 @@ if __name__ == '__main__':
     while True:
         schedule.run_pending()
         try:
-            connection = AuthorizedConnection(ADDRESS, USER, PASSWORD)
-            client = Client(connection)
+            if(connection is None):
+                connection = AuthorizedConnection(ADDRESS, USER, PASSWORD)
+                client = Client(connection)
         except Exception as e:
             logging.error(f"Exception - {e}")
             time.sleep(30)
@@ -141,5 +144,5 @@ if __name__ == '__main__':
 
             logging.info(f"Reconnection completed")
 
-        client.user.logout()
-        time.sleep(30)
+        #client.user.logout()
+        time.sleep(5)
