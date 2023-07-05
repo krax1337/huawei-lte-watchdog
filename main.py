@@ -115,7 +115,8 @@ if __name__ == '__main__':
         logging.info(f'Current cell: {current_cell} Current band: {current_band} | RSRQ: {signal["rsrq"]}   SINR: {signal["sinr"]}')
 
         # if (current_cell != CELL or current_band != modes[MODE]) and current_cell != "0" and current_band != "0" and int(current_band) > 0:
-        if (current_cell != CELL or int(current_band) != sum_band or ping_result.success() == False) and current_cell > 0 and current_band != "0" and current_cell != 0:
+        # print(current_band, int(current_band), sum_band)
+        if (current_cell != CELL or int(''.join(filter(lambda x: x != '0', str(current_band)))) != int(''.join(filter(lambda x: x != '0', str(sum_band)))) or ping_result.success() == False) and current_cell > 0 and current_band != "0" and current_cell != 0:
             temp_cell = 0
             cnt = 1
             logging.info("Reconnection initialized")
