@@ -6,7 +6,7 @@ services:
     restart: unless-stopped
     network_mode: host
     container_name: huawei-lte-watchdog
-    image: krax1337/huawei-lte-watchdog:1.0.5
+    image: krax1337/huawei-lte-watchdog:1.0.6
     environment:
       REBOOT_TIME: "07:30"
       LTE_CELL: "12345678"
@@ -15,4 +15,5 @@ services:
       LTE_ADDRESS: "http://192.168.8.1"
       LTE_USER: "admin"
       LTE_PASSWORD: "12345678"
+      PING_TIMEOUT: 5
       TZ: "Asia/Omsk"

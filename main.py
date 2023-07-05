@@ -37,6 +37,7 @@ ADDRESS = str(os.environ["LTE_ADDRESS"])
 USER = str(os.environ["LTE_USER"])
 PASSWORD = str(os.environ["LTE_PASSWORD"])
 TIME = str(os.environ["REBOOT_TIME"])
+PING_TIMEOUT = str(os.environ["PING_TIMEOUT"])
 
 BANDS_LIST = [
     ('1', '2100', 1),
@@ -79,6 +80,7 @@ connection = None
 schedule.every().day.at(TIME).do(reboot)
 
 if __name__ == '__main__':
+    logging.info("Service started")
     start_http_server(9995)
     if(CHANGE_TYPE != "SEQ" and CHANGE_TYPE != "ALL"):
         logging.error("Wrong LTE_CHANGE_TYPE must be SEQ or ALL")
@@ -95,7 +97,7 @@ if __name__ == '__main__':
             time.sleep(30)
             continue
 
-        ping_result = ping_host('1.1.1.1', timeout = 10)
+        ping_result = ping_host('1.1.1.1', timeout = int(PING_TIMEOUT))
         
         bdw = client.monitoring.traffic_statistics()
         current_cell = int(client.device.signal()["cell_id"])
@@ -116,6 +118,13 @@ if __name__ == '__main__':
 
         # if (current_cell != CELL or current_band != modes[MODE]) and current_cell != "0" and current_band != "0" and int(current_band) > 0:
         # print(current_band, int(current_band), sum_band)
+        ping_result_reboot = ping_host('1.1.1.1', timeout = 30)
+        if (ping_result_reboot.success() == False):
+            logging.info("Reboot initialized because of no internet")
+            client.device.reboot()
+            time.sleep(60)
+            continue
+        
         if (current_cell != CELL or int(''.join(filter(lambda x: x != '0', str(current_band)))) != int(''.join(filter(lambda x: x != '0', str(sum_band)))) or ping_result.success() == False) and current_cell > 0 and current_band != "0" and current_cell != 0:
             temp_cell = 0
             cnt = 1
