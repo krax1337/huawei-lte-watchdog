@@ -29,7 +29,7 @@ def reboot():
     connection = AuthorizedConnection(ADDRESS, USER, PASSWORD)
     client = Client(connection)
     client.device.reboot()
-    time.sleep(60)
+    time.sleep(90)
 
 
 CELL = int(os.environ["LTE_CELL"])
@@ -105,12 +105,19 @@ if __name__ == '__main__':
             if (connection is None):
                 connection = AuthorizedConnection(ADDRESS, USER, PASSWORD)
                 client = Client(connection)
+            elif(len(client.monitoring.traffic_statistics()) < 2):
+                raise Exception("Router is not reachable")
         except Exception as e:
             logging.error(f"Exception - {e}")
-            time.sleep(30)
+            time.sleep(60)
             continue
 
         ping_result = ping_host('1.1.1.1', timeout=int(PING_TIMEOUT))
+        if (not ping_result.success() and not MONITOR_ONLY and len(client.monitoring.traffic_statistics()) > 1):
+            logging.info("Reboot initialized because of no internet")
+            client.device.reboot()
+            time.sleep(90)
+            continue
 
         bdw = client.monitoring.traffic_statistics()
         current_cell = int(client.device.signal()["cell_id"])
@@ -130,45 +137,35 @@ if __name__ == '__main__':
         logging.info(f'Current cell: {current_cell} Current band: {
                      current_band} | RSRQ: {signal["rsrq"]}   SINR: {signal["sinr"]}')
 
-        ping_result_reboot = ping_host('1.1.1.1', timeout=30)
-        if (ping_result_reboot.success() == False):
-            logging.info("Reboot initialized because of no internet")
-            client.device.reboot()
-            time.sleep(60)
-            continue
+        if not MONITOR_ONLY and current_cell != CELL or (remove_zeros_and_convert_to_int(current_band) != remove_zeros_and_convert_to_int(sum_band)):
+            if current_cell > 0 and current_band != "0" and current_cell != 0:
+                temp_cell = 0
+                cnt = 1
+                logging.info("Reconnection initialized")
+                logging.info(f"Target cell: {
+                    CELL} - Target bands: {BANDS} - Change type: {CHANGE_TYPE}")
 
-        if not MONITOR_ONLY and current_cell != CELL:
-            if remove_zeros_and_convert_to_int(current_band) != remove_zeros_and_convert_to_int(sum_band):
-                if not ping_result.success() and current_cell > 0 and current_band != "0" and current_cell != 0:
-                    temp_cell = 0
-                    cnt = 1
-                    logging.info("Reconnection initialized")
-                    logging.info(f"Target cell: {
-                        CELL} - Target bands: {BANDS} - Change type: {CHANGE_TYPE}")
+                while temp_cell != CELL:
+                    if (CHANGE_TYPE == "ALL"):
+                        client.net.set_net_mode(
+                            sum_band, networkband, networkmode)
+                        time.sleep(10)
+                        temp_cell = int(client.device.signal()["cell_id"])
+                        logging.info(f"Attempt number: {
+                                     cnt} | Temporary cell: {temp_cell}")
+                        cnt += 1
+                    elif (CHANGE_TYPE == "SEQ"):
+                        client.net.set_net_mode(
+                            first_band, networkband, networkmode)
+                        time.sleep(10)
+                        client.net.set_net_mode(
+                            sum_band, networkband, networkmode)
+                        time.sleep(10)
+                        temp_cell = int(client.device.signal()["cell_id"])
+                        logging.info(f"Attempt number: {
+                                     cnt} | Temporary cell: {temp_cell}")
+                        cnt += 1
 
-                    while temp_cell != CELL:
-                        if (CHANGE_TYPE == "ALL"):
-                            logging.info("Change type is ALL")
-                            client.net.set_net_mode(
-                                sum_band, networkband, networkmode)
-                            time.sleep(5)
-                            temp_cell = int(client.device.signal()["cell_id"])
-                            logging.info(f"Attempt number: {cnt}")
-                            logging.info(f"Temporary cell: {temp_cell}")
-                            cnt += 1
-                        elif (CHANGE_TYPE == "SEQ"):
-                            logging.info("Change type is SEQ")
-                            client.net.set_net_mode(
-                                first_band, networkband, networkmode)
-                            time.sleep(5)
-                            client.net.set_net_mode(
-                                sum_band, networkband, networkmode)
-                            time.sleep(5)
-                            temp_cell = int(client.device.signal()["cell_id"])
-                            logging.info(f"Attempt number: {cnt}")
-                            logging.info(f"Temporary cell: {temp_cell}")
-                            cnt += 1
+                logging.info(f"Reconnection completed")
 
-                    logging.info(f"Reconnection completed")
-
-        time.sleep(5)
+        time.sleep(1)
