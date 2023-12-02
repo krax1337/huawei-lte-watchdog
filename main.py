@@ -29,7 +29,8 @@ def reboot():
     connection = AuthorizedConnection(ADDRESS, USER, PASSWORD)
     client = Client(connection)
     client.device.reboot()
-    time.sleep(90)
+    time.sleep(60)
+    logging.info("Reboot is done")
 
 
 CELL = int(os.environ["LTE_CELL"])
@@ -102,11 +103,9 @@ if __name__ == '__main__':
     while True:
         schedule.run_pending()
         try:
-            if (connection is None):
-                connection = AuthorizedConnection(ADDRESS, USER, PASSWORD)
-                client = Client(connection)
-            elif(len(client.monitoring.traffic_statistics()) < 2):
-                raise Exception("Router is not reachable")
+            connection = AuthorizedConnection(ADDRESS, USER, PASSWORD)
+            client = Client(connection)
+            logging.info("Connection established")
         except Exception as e:
             logging.error(f"Exception - {e}")
             time.sleep(60)
@@ -116,7 +115,8 @@ if __name__ == '__main__':
         if (not ping_result.success() and not MONITOR_ONLY and len(client.monitoring.traffic_statistics()) > 1):
             logging.info("Reboot initialized because of no internet")
             client.device.reboot()
-            time.sleep(90)
+            time.sleep(60)
+            logging.info("Reboot is done")
             continue
 
         bdw = client.monitoring.traffic_statistics()
@@ -148,19 +148,25 @@ if __name__ == '__main__':
                 while temp_cell != CELL:
                     if (CHANGE_TYPE == "ALL"):
                         client.net.set_net_mode(
+                            sum_band, 20000000000, networkmode)
+                        time.sleep(1)
+                        client.net.set_net_mode(
                             sum_band, networkband, networkmode)
-                        time.sleep(10)
+                        time.sleep(1)
                         temp_cell = int(client.device.signal()["cell_id"])
                         logging.info(f"Attempt number: {
                                      cnt} | Temporary cell: {temp_cell}")
                         cnt += 1
                     elif (CHANGE_TYPE == "SEQ"):
                         client.net.set_net_mode(
+                            sum_band, 20000000000, networkmode)
+                        time.sleep(1)
+                        client.net.set_net_mode(
                             first_band, networkband, networkmode)
-                        time.sleep(10)
+                        time.sleep(1)
                         client.net.set_net_mode(
                             sum_band, networkband, networkmode)
-                        time.sleep(10)
+                        time.sleep(1)
                         temp_cell = int(client.device.signal()["cell_id"])
                         logging.info(f"Attempt number: {
                                      cnt} | Temporary cell: {temp_cell}")
