@@ -103,9 +103,11 @@ if __name__ == '__main__':
     while True:
         schedule.run_pending()
         try:
-            connection = AuthorizedConnection(ADDRESS, USER, PASSWORD)
-            client = Client(connection)
-            logging.info("Connection established")
+            if(connection is None):
+                logging.info("Trying to establish connection")
+                connection = AuthorizedConnection(ADDRESS, USER, PASSWORD)
+                client = Client(connection)
+                logging.info("Connection established")
         except Exception as e:
             logging.error(f"Exception - {e}")
             time.sleep(60)
