@@ -29,13 +29,13 @@ PCI = Info('PCI', 'PCI')
 load_dotenv()
 
 
-def reboot(connection):
+def reboot():
     logging.info("Reboot initialized")
     client = Client(connection)
     client.device.reboot()
     time.sleep(60)
     logging.info("Reboot is done")
-
+    sys.exit()
 
 CELL = int(os.environ["LTE_CELL"])
 BANDS = str(os.environ["LTE_BANDS"])
@@ -103,7 +103,6 @@ if __name__ == '__main__':
         sys.exit()
 
     while True:
-        schedule.run_pending()
         try:
             if(connection is None):
                 logging.info("Trying to establish connection")
@@ -114,6 +113,7 @@ if __name__ == '__main__':
             logging.error(f"Exception - {e}")
             time.sleep(60)
             continue
+        schedule.run_pending()
 
         ping_result = ping_host('1.1.1.1', timeout=int(PING_TIMEOUT))
         if (not ping_result.success() and len(client.monitoring.traffic_statistics()) > 1):
