@@ -14,17 +14,17 @@ FORMAT = '[%(asctime)s] %(levelname)s - %(message)s'
 logging.basicConfig(format=FORMAT, stream=sys.stdout, level=logging.INFO)
 
 # Prometheus metrics
-SINR = Gauge('SINR', 'SINR')
-RSRQ = Gauge('RSRQ', 'RSRQ')
-RSRP = Gauge('RSRP', 'RSRP')
-RSSI = Gauge('RSSI', 'RSSI')
-UPLOAD = Gauge('UPLOAD', 'UPLOAD')
-DOWNLOAD = Gauge('DOWNLOAD', 'DOWNLOAD')
-CURRENT_CELL = Info('CURRENT_CELL', 'CURRENT_CELL')
-CURRENT_BAND = Info('CURRENT_BAND', 'CURRENT_BAND')
-ENODEB = Info('ENODEB', 'ENODEB')
-TAC = Info('TAC', 'TAC')
-PCI = Info('PCI', 'PCI')
+SINR = Gauge('lte_SINR', 'lte_SINR')
+RSRQ = Gauge('lte_RSRQ', 'lte_RSRQ')
+RSRP = Gauge('lte_RSRP', 'lte_RSRP')
+RSSI = Gauge('lte_RSSI', 'lte_RSSI')
+UPLOAD = Gauge('lte_UPLOAD', 'lte_UPLOAD')
+DOWNLOAD = Gauge('lte_DOWNLOAD', 'lte_DOWNLOAD')
+CURRENT_CELL = Info('lte_CURRENT_CELL', 'lte_CURRENT_CELL')
+CURRENT_BAND = Info('lte_CURRENT_BAND', 'lte_CURRENT_BAND')
+ENODEB = Info('lte_ENODEB', 'lte_ENODEB')
+TAC = Info('lte_TAC', 'lte_TAC')
+PCI = Info('lte_PCI', 'lte_PCI')
 
 load_dotenv()
 

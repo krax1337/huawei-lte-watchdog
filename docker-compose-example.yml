@@ -6,7 +6,7 @@ services:
     restart: unless-stopped
     network_mode: host
     container_name: huawei-lte-watchdog
-    image: krax1337/huawei-lte-watchdog:1.0.17
+    image: krax1337/huawei-lte-watchdog:1.0.19
     environment:
       REBOOT_TIME: 07:30
 
